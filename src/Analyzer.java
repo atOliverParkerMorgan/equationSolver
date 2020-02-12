@@ -2,6 +2,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.jar.JarOutputStream;
 
 
 // this method analyzes the user input and refactors it for further calculations
@@ -22,44 +23,70 @@ class Analyzer {
     void order(){
         sortList(inputLeft,sortL);
         sortList(inputRight,sortR);
-
-
     }
+    public void solve(){
+        order();
+        printEquation();
+        rootAndSquareRoot(sortL);
+        multiplyAndDivideLogic(sortL);
+        addAndSubtractLogic(sortL);
+        rootAndSquareRoot(sortR);
+        multiplyAndDivideLogic(sortR);
+        addAndSubtractLogic(sortR);
+        printEquation();
+    }
+
+
     private void sortList(String input,List<String> sort){
-        StringBuilder current = new StringBuilder();
-        int i;
-        for (i = 0; i<input.length() ; i++) {
-            if(Character.isDigit(input.charAt(i))||input.charAt(i)=='x'){
-                current.append(input.charAt(i));
 
-            }else {
-                sort.add(current.toString());
-                current = new StringBuilder();
-                int x = 0;
-                do{
-                    current.append(input.charAt(i+x));
-                    x++;
-                }while (allowedOperations.contains(Character.toString(input.charAt(i+x))));
-                i+=x-1;
-                sort.add(current.toString());
-                current = new StringBuilder();
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(c=='(' || c==')'){
+                s.append(c);
+                sort.add(s.toString());
+                s = new StringBuilder();
             }
-        }
-        sort.add(current.toString());
-        for (int j = 0; j < sort.size(); j++) {
-            if(Character.isDigit(sort.get(j).charAt(0))||sort.get(j).charAt(0)=='x'){
-                if(j==0){
-                    sort.set(j, '+' + sort.get(j));
 
-                }else {
-                    if(sort.get(j-1).equals("-")||sort.get(j-1).equals("+")) {
-                        sort.set(j, sort.get(j-1) + sort.get(j));
-                        sort.remove(j-1);
-                        j--;
-                    }else {
-                        sort.set(j, "+" + sort.get(j));
-                    }
+            else if(c=='*'||c=='/'){
+                if(i+1==input.length()){
+                    s.append(c);
+                    sort.add(s.toString());
+                    break;
                 }
+                if(input.charAt(i+1)=='*'&&c=='*'||input.charAt(i+1)=='/'&&c=='/'){
+                    s.append(c);
+                }else {
+                    s.append(c);
+                    sort.add(s.toString());
+                    s = new StringBuilder();
+                }
+            }
+
+            if(Character.isDigit(c)||c=='x'){
+                s.append(c);
+                if(i+1==input.length()||!Character.isDigit(input.charAt(i+1))){
+                    if(sort.size()==0){
+                        if(i==1){
+                            if( input.charAt(i-1)=='-'){
+                                s = new StringBuilder("-"+s.toString());
+                            }else {
+                                s = new StringBuilder("+" + s.toString());
+                            }
+                        }else {
+                            s = new StringBuilder("+" + s.toString());
+                        }
+                    }else{
+                        if(input.charAt(i-s.toString().length())=='-'){
+                            s = new StringBuilder("-"+s.toString());
+                        }else{
+                            s = new StringBuilder("+"+s.toString());
+                        }
+                    }
+                    sort.add(s.toString());
+                    s = new StringBuilder();
+                }
+
             }
         }
 
@@ -99,15 +126,23 @@ class Analyzer {
     }
 
     private void calculatingSide(List<String> equationSide, String operator){
-        int end = 0;
         while(equationSide.contains(operator)) {
             for (int i = 0; i < equationSide.size(); i++) {
                 if (equationSide.get(i).equals(operator) && Character.isDigit(equationSide.get(i - 1).charAt(1)) && Character.isDigit(equationSide.get(i + 1).charAt(1))) {
                     double x = Calculator.doAction(operator,equationSide.get(i - 1), equationSide.get(i + 1));
                     if(x>=0){
-                        equationSide.set(i, '+'+Double.toString(x));
-                    }else {
-                        equationSide.set(i, '-'+Double.toString(x));
+                        if(!Double.toString(x).contains("+")){
+                            equationSide.set(i, '+'+Double.toString(x));
+                        }else {
+                            equationSide.set(i, Double.toString(x));
+                        }
+                    }else{
+                        if(!Double.toString(x).contains("-")){
+                            equationSide.set(i, '-'+Double.toString(x));
+                        }else {
+                            equationSide.set(i, Double.toString(x));
+                        }
+
                     }
 
                     equationSide.remove(equationSide.get(i - 1));
@@ -116,10 +151,6 @@ class Analyzer {
 
                 }
             }
-            if(end == 1000){
-                break;
-            }
-            end++;
         }
     }
 
