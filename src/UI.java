@@ -12,7 +12,7 @@ public class UI extends Frame implements ActionListener{
     // Constructor to setup GUI components and event handlers
     public UI () {
         //setLayout(new FlowLayout());
-        Analyzer A = new Analyzer("x+20x*20/20*10-36*8/4","-322+8**+3+2*3*5*x");
+        Analyzer A = new Analyzer("x+20x*20/20*10-36*8/4","-322+8**+3+2*3*5");
         A.order();
         A.printEquation();
         A.solve();

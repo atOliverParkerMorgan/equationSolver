@@ -20,9 +20,8 @@ public class Polynomial {
                 realValue = Double.parseDouble(this.stringValue.get(0));
             }
         }
-
-
     }
+
 
 
 }

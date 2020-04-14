@@ -47,14 +47,16 @@ class Analyzer {
 
         finalVarCoefficient = totalLVar - totalRVar;
         System.out.println("Answer:");
+        // Debug System.out.println("solvedRight: "+totalR+"\nsolvedLeft: "+totalL+"\n Var total left: "+totalLVar);
         if(finalVarCoefficient == 0){
             solvedLeft = totalL;
             solvedRight = totalR;
+
             System.out.println(solvedLeft+" = "+solvedRight);
             if(solvedRight == solvedLeft){
                 System.out.println("if x is a Real Number the equation is true when x ∈ (-∞; ∞)");
             }else{
-                System.out.println("if x is a Real Number the equation has no answer");
+                System.out.println("if x is a Real Number the equation hasn't got an answer");
             }
         }else {
             solvedRight = (totalR - totalL) / finalVarCoefficient;
@@ -94,11 +96,12 @@ class Analyzer {
                     s = new StringBuilder();
                 }
             }
-
+           if (c=='.'){s.append(c);}
             // plus and minus is handled for every digit meaning that every digit has a + or - operator before it
            if(Character.isDigit(c)){
                 s.append(c);
-                if(i+1==input.length()||!Character.isDigit(input.charAt(i+1))){
+               System.out.println(sort.toString());
+                if(i+1==input.length()||!Character.isDigit(input.charAt(i+1))&&input.charAt(i+1)!='.'){
                     String variable = "";
                     if(i+1!=input.length()) {
                         variable = input.charAt(i + 1) == 'x' ? "x" : "";
@@ -181,10 +184,11 @@ class Analyzer {
 
     void test(){
 
-        List<String> sortLTest = sortList(inputLeft.replace("x", Double.toString(solvedRight)));
-        List<String> sortRTest = sortList(inputRight.replace("x", Double.toString(solvedRight)));
+        List<String> sortLTest = sortList(replaceVars(inputLeft,solvedRight));
+        List<String> sortRTest = sortList(replaceVars(inputRight,solvedRight));
         List<Polynomial> polynomialsLTest = createPolynomials(sortLTest);
         List<Polynomial> polynomialsRTest = createPolynomials(sortRTest);
+
         double totalTestL = Calculator.addUpPolynomials(polynomialsLTest)[0];
         double totalTestR = Calculator.addUpPolynomials(polynomialsRTest)[0];
         System.out.println("Test Calculation:");
@@ -192,6 +196,36 @@ class Analyzer {
         System.out.println("the test is: " + (totalTestL == totalTestR));
         System.out.println("\n");
 
+    }
+
+    private String replaceVars(String input, double var){
+        StringBuilder sort = new StringBuilder();
+
+        for (int i = 0; i <input.length() ; i++) {
+            char c = input.charAt(i);
+            if(c=='x'&&i==0){
+                if(var>0) {
+                    sort.append("+").append(var);
+                }else{
+                    sort.append("-").append(var);
+                }
+            }else {
+
+                if(c=='x' && Character.isDigit(input.charAt(i - 1))){
+                    if(var>0) {
+                        sort.append("*").append("+").append(var);
+                    }else{
+                        sort.append("-").append(var);
+                    }
+                }else if(c == 'x'){
+                    sort.append(var);
+                }else {
+                    sort.append(c);
+                }
+            }
+        }
+        // checking -- => +
+        return sort.toString().replaceAll("--","+");
     }
 
 

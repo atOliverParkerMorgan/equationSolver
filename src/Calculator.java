@@ -2,10 +2,11 @@ import java.util.List;
 
 public class Calculator {
     static List<String> getOneNumber(List<String> polynomial){
-        calculate(polynomial,"**");
         calculate(polynomial,"//");
-        calculate(polynomial,"*");
+        calculate(polynomial,"**");
         calculate(polynomial,"/");
+        calculate(polynomial,"*");
+
 
         return polynomial;
     }
@@ -23,6 +24,7 @@ public class Calculator {
         }
         return new double[]{total, totalVar};
     }
+
 
     static void calculate(List<String> expression, String operator){
         while(expression.contains(operator)) {
