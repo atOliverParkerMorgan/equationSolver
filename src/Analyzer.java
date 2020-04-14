@@ -13,40 +13,63 @@ class Analyzer {
      String inputRight;
      List<String> sortL;
      List<String> sortR;
+     List<Polynomial> polynomialsLeft;
+     List<Polynomial> polynomialsRight;
+     double solvedRight;
+     double solvedLeft;
+
+
     Analyzer(String inputLeft, String inputRight){
         this.inputLeft = inputLeft;
         this.inputRight = inputRight;
-        this.sortL = new ArrayList<>(){};
-        this.sortR = new ArrayList<>(){};
+        this.solvedRight = 0;
     }
 
     void order(){
-        sortList(inputLeft,sortL);
-        sortList(inputRight,sortR);
-    }
-    public void solve(){
-        order();
-
-        // left side
-        printEquation();
-        rootAndSquareRoot(sortL);
-        multiplyAndDivideLogic(sortL);
-        addAndSubtractLogic(sortL);
-
-
-        // right side
-        brackets(sortR);
-        rootAndSquareRoot(sortR);
-        multiplyAndDivideLogic(sortR);
-        addAndSubtractLogic(sortR);
-        printEquation();
+        this.sortR = sortList(inputRight);
+        this.sortL = sortList(inputLeft);
+        this.polynomialsLeft = createPolynomials(sortL);
+        this.polynomialsRight = createPolynomials(sortR);
     }
 
+    void solve(){
+        // adding polynomials up
+        double[] totalsR =  Calculator.addUpPolynomials(polynomialsRight);
+        double[] totalsL =  Calculator.addUpPolynomials(polynomialsLeft);
 
-    private void sortList(String input,List<String> sort){
+        double finalVarCoefficient;
+        double totalR = totalsR[0];
+        double totalRVar = totalsR[1];
+
+        double totalL = totalsL[0];
+        double totalLVar = totalsL[1];
+
+
+        finalVarCoefficient = totalLVar - totalRVar;
+        System.out.println("Answer:");
+        if(finalVarCoefficient == 0){
+            solvedLeft = totalL;
+            solvedRight = totalR;
+            System.out.println(solvedLeft+" = "+solvedRight);
+            if(solvedRight == solvedLeft){
+                System.out.println("if x is a Real Number the equation is true when x ∈ (-∞; ∞)");
+            }else{
+                System.out.println("if x is a Real Number the equation has no answer");
+            }
+        }else {
+            solvedRight = (totalR - totalL) / finalVarCoefficient;
+            System.out.println("x = "+solvedRight);
+        }
+        System.out.println("\n");
+
+        // the variable will be default on the left side
+
+    }
+
+    private List<String> sortList(final String input){
         // this method method sorts the string input into a List separating digits operators and brackets for
         // further processing
-
+        List<String> sort= new ArrayList<>();
 
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
@@ -73,186 +96,103 @@ class Analyzer {
             }
 
             // plus and minus is handled for every digit meaning that every digit has a + or - operator before it
-
-            if(Character.isDigit(c)||c=='x'){
+           if(Character.isDigit(c)){
                 s.append(c);
                 if(i+1==input.length()||!Character.isDigit(input.charAt(i+1))){
-                    if(sort.size()==0){ // this element is the first in the list
-                        if(i==1){
-                            if( input.charAt(i-1)=='-'){
-                                s = new StringBuilder("-"+s.toString());
-                            }else {
-                                s = new StringBuilder("+" + s.toString());
-                            }
-                        }else {
-                            s = new StringBuilder("+" + s.toString());
-                        }
-                    }else{
-                        if(input.charAt(i-s.toString().length())=='-'){
-                            s = new StringBuilder("-"+s.toString());
+                    String variable = "";
+                    if(i+1!=input.length()) {
+                        variable = input.charAt(i + 1) == 'x' ? "x" : "";
+                    }
+                    if(i==0){ // this element is the first in the list
+                        s = new StringBuilder("+" + s.toString());
+
+                    }else if(i==1){
+                        if(input.charAt(0)=='-') {
+                            s = new StringBuilder("-" + s.toString()+variable);
                         }else{
-                            s = new StringBuilder("+"+s.toString());
+                            s = new StringBuilder("+" + s.toString()+variable);
+                        }
+                    }
+                    else{
+                        if(input.charAt(i-s.toString().length())=='-'){
+                            s = new StringBuilder("-"+s.toString()+variable);
+                        }else{
+                            s = new StringBuilder("+"+s.toString()+variable);
                         }
                     }
                     sort.add(s.toString());
                     s = new StringBuilder();
                 }
 
-            }
+            }else if(c=='x'){
+               if(i==0){
+                   s = new StringBuilder("+1x");
+                   sort.add(s.toString());
+                   s = new StringBuilder();
+               }else if(!Character.isDigit(input.charAt(i-1))){
+                   if(input.charAt(i-1)=='-') {
+                       s = new StringBuilder("-1x");
+                       sort.add(s.toString());
+                       s = new StringBuilder();
+                   }else{
+                       s = new StringBuilder("+1x");
+                       sort.add(s.toString());
+                       s = new StringBuilder();
+                   }
+               }
+           }
         }
+        return sort;
 
     }
+    private List<Polynomial> createPolynomials(final List<String> equationSide){
+        List<Polynomial> polynomialsSide = new ArrayList<>();
+        StringBuilder foundPolynomial = new StringBuilder();
 
-    private void brackets(List<String> equationSide) {
+        String lastString = "";
+        int end = 0;
 
-        // find the most inner bracket
-        // count the number of ( brackets
-        int bracketCount = 0;
-        for (String element: equationSide) {
-            if(element.equals("(")){
-                bracketCount ++ ;
+        for (String s : equationSide) {
+            if((lastString.contains("+")||lastString.contains("-")) && (s.contains("+")||s.contains("-"))){
+               polynomialsSide.add(new Polynomial(sortList(foundPolynomial.toString())));
+               foundPolynomial = new StringBuilder();
             }
-        }
-        while(bracketCount>0) {
-            List<String> mostInnerBracket = new ArrayList<>();
-            int currentBracketCount = bracketCount;
-            // find the most inner bracket
-            int index = 0;
-            int index2;
+            foundPolynomial.append(s);
+            end++;
 
-            for (String element : equationSide) {
-                if (currentBracketCount == 1 && element.equals("(")) {
-                    index2 = index+1;
-                    while (!equationSide.get(index2).equals(")")) {
-                        mostInnerBracket.add(equationSide.get(index2));
-                        index2++;
-                    }
-                    bracketCount--;
-                    System.out.println(Arrays.toString(mostInnerBracket.toArray()));
-                    break;
+            lastString = s;
 
-
-                } else if (element.equals("(")) {
-                    currentBracketCount--;
-                }
-                index++;
+            if(end == equationSide.size()){
+                polynomialsSide.add(new Polynomial(sortList(foundPolynomial.toString())));
             }
-            rootAndSquareRoot(mostInnerBracket);
-            multiplyAndDivideLogic(mostInnerBracket);
-            addAndSubtractLogic(mostInnerBracket);
-
-
-            int removeIndex = index;
-            while (!equationSide.get(removeIndex).equals(")")) {
-                equationSide.remove(removeIndex);
-            }
-            equationSide.remove(removeIndex);
-
-            // replace the brackets with the solved version
-            int i2 = 0;
-            for (int i = index; i < mostInnerBracket.size()+index; i++) {
-                equationSide.add(i,mostInnerBracket.get(i2));
-                i2++;
-            }
-
 
         }
+        return polynomialsSide;
     }
 
-    private void rootAndSquareRoot(List<String> equationSide){
-        calculatingSide(equationSide,"**");
-        calculatingSide(equationSide,"//"); }
 
-    private void multiplyAndDivideLogic(List<String> equationSide){
-        calculatingSide(equationSide,"*");
-        calculatingSide(equationSide,"/");
-    }
-    private void addAndSubtractLogic(List<String> equationSide){
-        boolean foundFirstNumber = false;
-        String stringValueTotal = "";
-        for (int i = 0; i < equationSide.size(); i++) {
-            if(!foundFirstNumber&&Character.isDigit(equationSide.get(i).charAt(1))){
-                stringValueTotal = equationSide.get(i);
-                foundFirstNumber = true;
-                equationSide.remove(equationSide.get(i));
-                i--;
-            }else if(Character.isDigit(equationSide.get(i).charAt(1))){
-                double x = Calculator.add(stringValueTotal,equationSide.get(i));
 
-                if(x>=0 ){
-                    if(!Double.toString(Calculator.add(stringValueTotal,equationSide.get(i))).contains("+")){
-                        stringValueTotal = "+"+ Calculator.add(stringValueTotal, equationSide.get(i));
-                    }else{
-                        stringValueTotal = Double.toString(Calculator.add(stringValueTotal, equationSide.get(i)));
-                    }
-                }else if(x<0){
-                    if(!Double.toString(Calculator.add(stringValueTotal,equationSide.get(i))).contains("-")){
-                        stringValueTotal = "-" + Calculator.add(stringValueTotal, equationSide.get(i));
-                    }else{
-                        stringValueTotal = Double.toString(Calculator.add(stringValueTotal, equationSide.get(i)));
-                    }
 
-                }
-
-                equationSide.remove(equationSide.get(i));
-                i--;
-            }
-        }
-        equationSide.add(stringValueTotal);
-
+    public void printEquation(){
+        System.out.println("Computed equation:");
+        System.out.println( Arrays.toString(sortL.toArray())+" = "+Arrays.toString(sortR.toArray()));
+        System.out.println("\n");
     }
 
-    private void calculatingSide(List<String> equationSide, String operator){
-        // count the number of x variables
-        int varCount = 1;
-        int operatorCount = 0;
-        // initial values can't equal so while loop can start
-        // repeat loop until there are no operators in the list or the number of operators equals the number of
-        // variables x
-        while(equationSide.contains(operator)&&varCount!=operatorCount) {
-            varCount = 0;
-            operatorCount = 0;
-            for (String element:equationSide) {
-                if(element.equals("+x")||element.equals("-x")){
-                    varCount++;
-                }if(element.equals(operator)){
-                    operatorCount++;
-                }
-            }
+    void test(){
 
+        List<String> sortLTest = sortList(inputLeft.replace("x", Double.toString(solvedRight)));
+        List<String> sortRTest = sortList(inputRight.replace("x", Double.toString(solvedRight)));
+        List<Polynomial> polynomialsLTest = createPolynomials(sortLTest);
+        List<Polynomial> polynomialsRTest = createPolynomials(sortRTest);
+        double totalTestL = Calculator.addUpPolynomials(polynomialsLTest)[0];
+        double totalTestR = Calculator.addUpPolynomials(polynomialsRTest)[0];
+        System.out.println("Test Calculation:");
+        System.out.println(totalTestL + " = " + totalTestR);
+        System.out.println("the test is: " + (totalTestL == totalTestR));
+        System.out.println("\n");
 
-            for (int i = 0; i < equationSide.size(); i++) {
-
-                if (equationSide.get(i).equals(operator) ) {
-                    if(Character.isDigit(equationSide.get(i - 1).charAt(1)) && Character.isDigit(equationSide.get(i + 1).charAt(1))) {
-                        double x = Calculator.doAction(operator, equationSide.get(i - 1), equationSide.get(i + 1));
-                        // adding +; - logic
-                        if (x >= 0) {
-                            if (!Double.toString(x).contains("+")) {
-                                equationSide.set(i, '+' + Double.toString(x));
-                            } else {
-                                equationSide.set(i, Double.toString(x));
-                            }
-                        } else {
-                            if (!Double.toString(x).contains("-")) {
-                                equationSide.set(i, '-' + Double.toString(x));
-                            } else {
-                                equationSide.set(i, Double.toString(x));
-                            }
-
-                        }
-
-                        equationSide.remove(equationSide.get(i - 1));
-                        equationSide.remove(equationSide.get(i));
-                        break;
-                    }
-
-                }
-            }
-        }
     }
-
-    public void printEquation(){System.out.println( Arrays.toString(sortL.toArray())+" = "+Arrays.toString(sortR.toArray()));}
 
 
 }
