@@ -1,9 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Polynomial {
+class Polynomial {
     boolean hasVar;
-    List<String> stringValue;
+    private List<String> stringValue;
     double realValue;
 
     Polynomial(List<String> stringValue){

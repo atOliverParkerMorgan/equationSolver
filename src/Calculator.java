@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class Calculator {
+class Calculator {
     static List<String> getOneNumber(List<String> polynomial){
         calculate(polynomial,"//");
         calculate(polynomial,"**");
@@ -26,7 +26,7 @@ public class Calculator {
     }
 
 
-    static void calculate(List<String> expression, String operator){
+    private static void calculate(List<String> expression, String operator){
         while(expression.contains(operator)) {
             for (int i = 0; i < expression.size(); i++) {
 
@@ -73,19 +73,19 @@ public class Calculator {
         }
     }
 
-    static String add(String num1, String num2){
+    private static String add(String num1, String num2){
         if(num1.contains("x") && num2.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) + Double.parseDouble(num2.replace("x", "")))+"x";
         }
         return Double.toString(Double.parseDouble(num1) + Double.parseDouble(num2));
     }
-    static String subtract(String num1, String num2){
+    private static String subtract(String num1, String num2){
         if(num1.contains("x") && num2.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) - Double.parseDouble(num2.replace("x", "")))+"x";
         }
         return Double.toString(Double.parseDouble(num1) - Double.parseDouble(num2));
     }
-    static String multiply(String num1, String num2){
+    private static String multiply(String num1, String num2){
         if(num1.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) * Double.parseDouble(num2))+"x";
         }else if(num2.contains("x")){
@@ -94,7 +94,7 @@ public class Calculator {
 
         return Double.toString(Double.parseDouble(num1) * Double.parseDouble(num2));
     }
-    static String divide(String num1, String num2){
+    private static String divide(String num1, String num2){
         if(num1.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) / Double.parseDouble(num2))+"x";
         }else if(num2.contains("x")){
@@ -103,14 +103,14 @@ public class Calculator {
         return Double.toString(Double.parseDouble(num1) / Double.parseDouble(num2));
     }
 
-    static String squareRoot(String num1, String num2){
+    private static String squareRoot(String num1, String num2){
         return Double.toString(Math.pow(Double.parseDouble(num2),  1/Double.parseDouble(num1)));
     }
-    static String root(String num1, String num2){
+    private static String root(String num1, String num2){
         return Double.toString(Math.pow(Double.parseDouble(num1),  Double.parseDouble(num2)));
     }
 
-    static String doAction(String operation, String num1, String num2){
+    private static String doAction(String operation, String num1, String num2){
         switch (operation){
             case "+":
                 return add(num1,num2);
