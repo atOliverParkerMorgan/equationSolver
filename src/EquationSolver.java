@@ -13,6 +13,7 @@ class EquationSolver extends Analyzer{
         this.solvedRight = 0;
     }
     void solve(){
+        printEquation();
         this.polynomialsLeft = createPolynomials(sortL);
         this.polynomialsRight = createPolynomials(sortR);
         // adding polynomials up
@@ -29,7 +30,7 @@ class EquationSolver extends Analyzer{
 
         finalVarCoefficient = totalLVar - totalRVar;
         System.out.println("Answer:");
-        // Debug System.out.println("solvedRight: "+totalR+"\nsolvedLeft: "+totalL+"\n Var total left: "+totalLVar);
+        // Debug System.out.println("solvedRight: "+totalR+"\nsolvedLeft: "+totalL+"\nVar total left: "+totalLVar+"\nVar total right: "+totalRVar);
         if(finalVarCoefficient == 0){
             solvedRight = totalR;
 
@@ -45,7 +46,7 @@ class EquationSolver extends Analyzer{
             }
         }else {
             solvedRight = (totalR - totalL) / finalVarCoefficient;
-            System.out.println("x = "+solvedRight);
+            System.out.println("x = "+fixOperators(Double.toString(solvedRight)));
         }
         System.out.println("\n");
 
@@ -77,10 +78,11 @@ class EquationSolver extends Analyzer{
         return polynomialsSide;
     }
 
-    void test(){
+    private void test(){
 
         List<String> sortLTest = sortList(replaceVars(inputLeft,solvedRight));
         List<String> sortRTest = sortList(replaceVars(inputRight,solvedRight));
+        System.out.println(sortLTest);
         List<Polynomial> polynomialsLTest = createPolynomials(sortLTest);
         List<Polynomial> polynomialsRTest = createPolynomials(sortRTest);
 
@@ -98,23 +100,14 @@ class EquationSolver extends Analyzer{
 
     private String replaceVars(String input, double var){
         StringBuilder sort = new StringBuilder();
-
         for (int i = 0; i <input.length() ; i++) {
             char c = input.charAt(i);
             if(c=='x'&&i==0){
-                if(var>0) {
-                    sort.append("+").append(var);
-                }else{
-                    sort.append("-").append(var);
-                }
+                sort.append(var);
             }else {
 
                 if(c=='x' && Character.isDigit(input.charAt(i - 1))){
-                    if(var>0) {
-                        sort.append("*").append("+").append(var);
-                    }else{
-                        sort.append("-").append(var);
-                    }
+                    sort.append("*").append(var);
                 }else if(c == 'x'){
                     sort.append(var);
                 }else {
@@ -123,7 +116,13 @@ class EquationSolver extends Analyzer{
             }
         }
         // checking -- => +
-        return sort.toString().replaceAll("--","+");
+        return fixOperators(sort.toString());
     }
+    private String fixOperators(String input){
+        return input.replaceAll("--", "+").replaceAll("-\\+","-" ).
+                replaceAll("\\+-","-").replaceAll("\\+\\+","+").
+                replaceAll("-0.0","0.0").replaceAll("\\+0.0","0.0");
+    }
+
 
 }

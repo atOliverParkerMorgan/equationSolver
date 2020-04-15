@@ -91,7 +91,11 @@ class Calculator {
         }else if(num2.contains("x")){
             return (Double.parseDouble(num1) * Double.parseDouble(num2.replace("x","")))+"x";
         }
-
+        if(num1.equals("-0.0")||num1.equals("+0.0")){
+            return "0.0";
+        }else if(num2.equals("-0.0")||num2.equals("+0.0")){
+            return "0.0";
+        }
         return Double.toString(Double.parseDouble(num1) * Double.parseDouble(num2));
     }
     private static String divide(String num1, String num2){
@@ -100,6 +104,12 @@ class Calculator {
         }else if(num2.contains("x")){
             return ( Double.parseDouble(num1) / Double.parseDouble(num2.replace("x","")))+"x";
         }
+        if(num1.equals("-0.0")||num1.equals("+0.0")){
+            return "0.0";
+        }else if(num2.equals("-0.0")||num2.equals("+0.0")){
+            throw new java.lang.Error("can't divide by zero");
+        }
+
         return Double.toString(Double.parseDouble(num1) / Double.parseDouble(num2));
     }
 
