@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 class Calculator {
@@ -24,7 +25,38 @@ class Calculator {
         }
         return new double[]{total, totalVar};
     }
+    static List<Polynomial> multiplyBrackets(List<Polynomial> polynomials1, List<Polynomial> polynomials2){
+        double[] t1 = addUpPolynomials(polynomials1);
+        double[] t2 = addUpPolynomials(polynomials2);
+        String x1 = t1[1]==0?"0":"x";
+        String x2 = t2[1]==0?"0":"x";
+        // String xPowered = x1.equals("x") && x2.equals("x")?"**2":"";
 
+        String varTotal1 = t1[1]==0?"1":Double.toString(t1[1]);
+        String varTotal2 = t2[1]==0?"1":Double.toString(t2[1]);
+        String total1 = t1[0]==0?"1":Double.toString(t1[0]);
+        String total2 = t2[0]==0?"1":Double.toString(t2[0]);
+
+        // multiplication with in brackets
+        // (vT1+t1)*(vT2+t2) = vT1*vT2+vT1*t2+t1*vT2+t1*t2;
+        // varTotal1 * varTotal2 + varTotal1 * total2 + total1 * varTotal2 + total1 * total2
+        List<String> output = new ArrayList<>();
+
+        output.add(varTotal1); output.add("*"); output.add(x1); output.add("*");
+        output.add(varTotal2); output.add("*"); output.add(x2); output.add("+");
+
+        output.add(varTotal1); output.add("*"); output.add(x1); output.add("*");
+        output.add(total2); output.add("+");
+
+        output.add(total1); output.add("*");
+        output.add(varTotal2); output.add("*"); output.add(x2); output.add("+");
+
+        output.add(total1); output.add("*");
+        output.add(total2);
+
+
+        return Polynomial.createPolynomials(output);
+    }
 
     private static void calculate(List<String> expression, String operator){
         while(expression.contains(operator)) {

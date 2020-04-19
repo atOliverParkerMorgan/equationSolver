@@ -1,21 +1,20 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class EquationSolver extends Analyzer{
-    private List<Polynomial> polynomialsLeft;
-    private List<Polynomial> polynomialsRight;
     private double solvedRight;
 
     EquationSolver(String leftSide, String rightSide){
         super(leftSide, rightSide);
-        this.polynomialsLeft = createPolynomials(sortL);
-        this.polynomialsRight = createPolynomials(sortR);
         this.solvedRight = 0;
     }
     void solve(){
+
+        sortL = Brackets.solveBrackets(sortL,0,0, false);
         printEquation();
-        this.polynomialsLeft = createPolynomials(sortL);
-        this.polynomialsRight = createPolynomials(sortR);
+        List<Polynomial> polynomialsLeft = Polynomial.createPolynomials(sortL);
+        List<Polynomial> polynomialsRight = Polynomial.createPolynomials(sortR);
         // adding polynomials up
         double[] totalsR =  Calculator.addUpPolynomials(polynomialsRight);
         double[] totalsL =  Calculator.addUpPolynomials(polynomialsLeft);
@@ -53,39 +52,13 @@ class EquationSolver extends Analyzer{
         // the variable will be default on the left side
         test();
     }
-    private List<Polynomial> createPolynomials(final List<String> equationSide){
-        List<Polynomial> polynomialsSide = new ArrayList<>();
-        StringBuilder foundPolynomial = new StringBuilder();
-
-        String lastString = "";
-        int end = 0;
-
-        for (String s : equationSide) {
-            if((lastString.contains("+")||lastString.contains("-")) && (s.contains("+")||s.contains("-"))){
-                polynomialsSide.add(new Polynomial(sortList(foundPolynomial.toString())));
-                foundPolynomial = new StringBuilder();
-            }
-            foundPolynomial.append(s);
-            end++;
-
-            lastString = s;
-
-            if(end == equationSide.size()){
-                polynomialsSide.add(new Polynomial(sortList(foundPolynomial.toString())));
-            }
-
-        }
-        return polynomialsSide;
-    }
 
     private void test(){
 
         List<String> sortLTest = sortList(replaceVars(inputLeft,solvedRight));
         List<String> sortRTest = sortList(replaceVars(inputRight,solvedRight));
-        System.out.println(sortLTest);
-        List<Polynomial> polynomialsLTest = createPolynomials(sortLTest);
-        List<Polynomial> polynomialsRTest = createPolynomials(sortRTest);
-
+        List<Polynomial> polynomialsLTest = Polynomial.createPolynomials(sortLTest);
+        List<Polynomial> polynomialsRTest = Polynomial.createPolynomials(sortRTest);
         double totalTestL = Calculator.addUpPolynomials(polynomialsLTest)[0];
         double totalTestR = Calculator.addUpPolynomials(polynomialsRTest)[0];
         System.out.println("Test Calculation:");
@@ -123,6 +96,4 @@ class EquationSolver extends Analyzer{
                 replaceAll("\\+-","-").replaceAll("\\+\\+","+").
                 replaceAll("-0.0","0.0").replaceAll("\\+0.0","0.0");
     }
-
-
 }
