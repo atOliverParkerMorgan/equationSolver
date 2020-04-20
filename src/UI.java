@@ -10,7 +10,7 @@ public class UI extends Frame implements ActionListener{
     private Button btnCount;
 
     // Constructor to setup GUI components and event handlers
-    public UI () {
+    private UI() {
         //setLayout(new FlowLayout());
         EquationSolver E = new EquationSolver("1+2*(1+2*(1+2*(1+2)+1+2)*3*22+2)*1*1","x+1");
         E.solve();

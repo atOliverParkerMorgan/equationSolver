@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Brackets {
+class Brackets {
 
-    static List<String> excludeBrackets(final List<String> input, String tag){
+    private static List<String> excludeBrackets(final List<String> input, String tag){
         String bracketStart = "";
         List <String> output = new ArrayList<>();
 
@@ -25,7 +25,7 @@ public class Brackets {
     }
 
 
-    static List<String> getCoefficient(final List<String> input, String tag){
+    private static List<String> getCoefficient(final List<String> input, String tag){
         List<String> coefficient = new ArrayList<>();
         List<String> fixedInput = excludeBrackets(input, tag);
 
@@ -53,7 +53,7 @@ public class Brackets {
         return coefficient.size()==0? null: coefficient;
     }
 
-    static List<String> getBracketContentWithoutCoefficientToNextBracket(final List<String> input, String tag, String tagIn){
+    private static List<String> getBracketContentWithoutCoefficientToNextBracket(final List<String> input, String tag, String tagIn){
         boolean inBracket = false;
         List<String> content = new ArrayList<>();
         List<Integer> indexToNotAdd = new ArrayList<>();
@@ -95,21 +95,21 @@ public class Brackets {
 
     }
 
-    static List<String> solveBrackets(final List<String> input, int index1, int index2, boolean ending) {
+    static List<String> solveBrackets(final List<String> input, int index1, int index2, boolean ending, List<String> beforeCoefficient) {
 
         System.out.println(index1 + "F" + index2);
-        System.out.println(input);
 
 
         List<String> content = getBracketContentWithoutCoefficientToNextBracket(input, index1 + "F" + index2, index1 + "F" + (index2 + 1));
         List<String> coefficient = getCoefficient(input, index1 + "F" + index2);
         List<String> output = removeBracketAndCoefficient(input,index1 + "F" + index2,index1 + "F" + (index2 + 1));
-        System.out.println(output);
+
 
         if(input.contains(index1 + "F" + (index2+1))){
             index2++;
         }else if(input.contains((index1+1) + "F" + index2)){
             index1++;
+            beforeCoefficient = new ArrayList<>(Arrays.asList("*","1"));
         }
 
         if(coefficient==null){
@@ -119,12 +119,14 @@ public class Brackets {
                 System.out.println("finished");
                 return output;
             }else {
-                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2));
+                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2), beforeCoefficient);
             }
         }else {
             System.out.println("multiplied");
             // creating minor adjustments
             coefficient.remove(0);
+            coefficient.addAll(beforeCoefficient);
+            System.out.println(coefficient);
 
             List<Polynomial> solved = Calculator.multiplyBrackets(Polynomial.createPolynomials(content), Polynomial.createPolynomials(coefficient));
 
@@ -138,19 +140,19 @@ public class Brackets {
                 System.out.println(output);
                 return output;
             }else {
-                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2));
+                coefficient.add(0,"*");
+                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2),coefficient );
             }
         }
 
     }
 
-    static List<String> removeBracketAndCoefficient(final List<String> input, String tag, String tagIn){
+    private static List<String> removeBracketAndCoefficient(final List<String> input, String tag, String tagIn){
 
         List<String> helper = new ArrayList<>();
         List<String> output = new ArrayList<>();
         List<Integer> indexToNotAdd = new ArrayList<>();
         List<String> firstCoefficient = new ArrayList<>();
-        int firstBracketIndex = 0;
 
         boolean afterLast = false;
         boolean isANum = false;

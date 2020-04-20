@@ -1,5 +1,3 @@
-
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -144,7 +142,7 @@ class Analyzer {
     }
 
 
-    public void printEquation(){
+    void printEquation(){
         System.out.println("Computed equation:");
         System.out.println( Arrays.toString(sortL.toArray())+" = "+Arrays.toString(sortR.toArray()));
         System.out.println("\n");

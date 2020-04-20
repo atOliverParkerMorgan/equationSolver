@@ -6,7 +6,7 @@ class Polynomial {
     List<String> stringValue;
     double realValue;
 
-    Polynomial(List<String> stringValue){
+    private Polynomial(List<String> stringValue){
 
         // on init polynomials multiply into one number
 
