@@ -12,6 +12,7 @@ class EquationSolver extends Analyzer{
     void solve(){
 
         sortL = Brackets.solveBrackets(sortL,0,0, false);
+        sortR = Brackets.solveBrackets(sortR,0,0, false);
         printEquation();
         List<Polynomial> polynomialsLeft = Polynomial.createPolynomials(sortL);
         List<Polynomial> polynomialsRight = Polynomial.createPolynomials(sortR);
@@ -54,9 +55,10 @@ class EquationSolver extends Analyzer{
     }
 
     private void test(){
-
         List<String> sortLTest = sortList(replaceVars(inputLeft,solvedRight));
         List<String> sortRTest = sortList(replaceVars(inputRight,solvedRight));
+        sortLTest = Brackets.solveBrackets(sortLTest,0,0,false);
+        sortRTest = Brackets.solveBrackets(sortRTest,0,0,false);
         List<Polynomial> polynomialsLTest = Polynomial.createPolynomials(sortLTest);
         List<Polynomial> polynomialsRTest = Polynomial.createPolynomials(sortRTest);
         double totalTestL = Calculator.addUpPolynomials(polynomialsLTest)[0];

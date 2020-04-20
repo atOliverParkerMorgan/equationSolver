@@ -104,6 +104,7 @@ public class Brackets {
         List<String> content = getBracketContentWithoutCoefficientToNextBracket(input, index1 + "F" + index2, index1 + "F" + (index2 + 1));
         List<String> coefficient = getCoefficient(input, index1 + "F" + index2);
         List<String> output = removeBracketAndCoefficient(input,index1 + "F" + index2,index1 + "F" + (index2 + 1));
+        System.out.println(output);
 
         if(input.contains(index1 + "F" + (index2+1))){
             index2++;
@@ -149,6 +150,11 @@ public class Brackets {
         List<String> output = new ArrayList<>();
         List<Integer> indexToNotAdd = new ArrayList<>();
         List<String> firstCoefficient = new ArrayList<>();
+        int firstBracketIndex = 0;
+
+        boolean afterLast = false;
+        boolean isANum = false;
+
         boolean removeFirstBracket = false;
         boolean isInSecondBracket = false;
 
@@ -181,32 +187,47 @@ public class Brackets {
                 if(index!=0 && !removeFirstBracket) {
                     int i = 1;
                     indexToNotAdd.add(index);
-                    while (i != 0 && i % 2 == 0 || (i % 2 == 1 && (input.get(index - i).contains("*") || input.get(index - i).contains("/")))) {
+                    boolean nextAdd = false;
+                    while (index - i >= 0 && (input.get(index - i).contains("*") || input.get(index - i).contains("/"))||nextAdd) {
                         indexToNotAdd.add(index - i);
                         i++;
+                        nextAdd = !nextAdd;
                     }
                 }else if((index+1)!=input.size()){
                     int i = 1;
                     indexToNotAdd.add(index);
-                    while (index +i+1 != input.size() && i % 2 == 0 || (i % 2 == 1 && (input.get(index + i).contains("*") || input.get(index + i).contains("/")))) {
+                    boolean nextAdd = false;
+                    while (index + i < input.size() && (input.get(index + i).contains("*") || input.get(index + i).contains("/"))||nextAdd) {
                         indexToNotAdd.add(index + i);
                         i++;
+                        nextAdd = !nextAdd;
                     }
+                    afterLast = true;
                 }
                 removeFirstBracket = !removeFirstBracket;
             }
-            if((!removeFirstBracket||isInSecondBracket)&&!s.equals(tag)){
+
+            if((((!removeFirstBracket||isInSecondBracket)))&&!s.equals(tag)&&!afterLast){
                 helper.add(s);
+            }
+            if(((index+1)!=input.size()&&afterLast)){
+                if(isANum||(input.get(index+1).contains("*")||input.get(index+1).contains("/"))){
+                    isANum = !isANum;
+                }else {
+                    afterLast = false;
+                }
             }
 
             index++;
 
         }
+
         for (int i = 0; i < helper.size(); i++) {
             if(indexToNotAdd.indexOf(i)==-1){
                 output.add(helper.get(i));
             }
         }
+
         for (int j = firstCoefficient.size(); j > 0; j--) {
             output.add(output.indexOf(tagIn),firstCoefficient.get(j-1));
         }
