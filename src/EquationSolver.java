@@ -10,9 +10,9 @@ class EquationSolver extends Analyzer{
         this.solvedRight = 0;
     }
     void solve(){
-
-        sortL = Brackets.solveBrackets(sortL,0,0, false, new ArrayList<>(Arrays.asList("*","1")));
-        sortR = Brackets.solveBrackets(sortR,0,0, false, new ArrayList<>(Arrays.asList("*","1")));
+        sortL = Brackets.solveBrackets(sortL,0,0,!sortL.contains("0F0"),null);
+        sortR = Brackets.solveBrackets(sortR,0,0,!sortR.contains("0F0"),null);
+        System.out.println(sortL);
         printEquation();
         List<Polynomial> polynomialsLeft = Polynomial.createPolynomials(sortL);
         List<Polynomial> polynomialsRight = Polynomial.createPolynomials(sortR);
@@ -57,8 +57,8 @@ class EquationSolver extends Analyzer{
     private void test(){
         List<String> sortLTest = sortList(replaceVars(inputLeft,solvedRight));
         List<String> sortRTest = sortList(replaceVars(inputRight,solvedRight));
-        sortLTest = Brackets.solveBrackets(sortLTest,0,0,false, new ArrayList<>(Arrays.asList("*","1")));
-        sortRTest = Brackets.solveBrackets(sortRTest,0,0,false, new ArrayList<>(Arrays.asList("*","1")));
+        sortLTest = Brackets.solveBrackets(sortLTest,0,0,!sortLTest.contains("0F0"),null);
+        sortRTest = Brackets.solveBrackets(sortRTest,0,0,!sortRTest.contains("0F0"),null);
         List<Polynomial> polynomialsLTest = Polynomial.createPolynomials(sortLTest);
         List<Polynomial> polynomialsRTest = Polynomial.createPolynomials(sortRTest);
         double totalTestL = Calculator.addUpPolynomials(polynomialsLTest)[0];
@@ -93,9 +93,8 @@ class EquationSolver extends Analyzer{
         // checking -- => +
         return fixOperators(sort.toString());
     }
-    private String fixOperators(String input){
+    static String fixOperators(String input){
         return input.replaceAll("--", "+").replaceAll("-\\+","-" ).
-                replaceAll("\\+-","-").replaceAll("\\+\\+","+").
-                replaceAll("-0.0","0.0").replaceAll("\\+0.0","0.0");
+                replaceAll("\\+-","-").replaceAll("\\+\\+","+");
     }
 }

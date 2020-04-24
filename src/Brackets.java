@@ -1,8 +1,16 @@
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
-class Brackets {
+class Brackets { // this is a lot of code a have to find better solution plus it doesn't even work :(
+    private List<String> coefficient;
+    private List<String> content;
+    private static HashMap<String, Brackets> allBrackets;
+    private static List<String> currentBracketSolvedValue;
+    private Brackets(List<String> coefficient, List<String> content) {
+        this.coefficient = coefficient;
+        this.content = content;
+    }
 
     private static List<String> excludeBrackets(final List<String> input, String tag){
         String bracketStart = "";
@@ -22,6 +30,39 @@ class Brackets {
             }
         }
         return output;
+    }
+    private static List<String> excludeAllBracketsAndCoefficient(final List<String> input, String firstTag){
+        List<String> output = new ArrayList<>();
+        List<Integer> doNotAdd = new ArrayList<>();
+        List<String> fixedInput = excludeBrackets(input, firstTag);
+
+
+        for (int i = 0; i < fixedInput.size(); i++) {
+
+            if (fixedInput.get(i).equals("B")) {
+                int index = 1;
+                while ((i-index>=0&&(index % 2 == 0||(index % 2 == 1 && fixedInput.get(i-index).equals("*")||
+                        fixedInput.get(i-index).equals("/")||fixedInput.get(i-index).equals("//")||fixedInput.get(i-index).equals("**"))))) {
+
+                    doNotAdd.add(i-index);
+                    index++;
+                }
+                int index2 = 1;
+                while ((i+index2<fixedInput.size()&&(index2 % 2 == 0||(index2 % 2 == 1 && fixedInput.get(i+index2).equals("*")||
+                        fixedInput.get(i+index2).equals("/")||fixedInput.get(i+index2).equals("//")||fixedInput.get(i+index2).equals("**"))))) {
+                    doNotAdd.add(i+index2);
+                    index2++;
+                }
+            }
+
+        }
+        for (int i = 0; i <fixedInput.size() ; i++) {
+            if(!doNotAdd.contains(i)&&!fixedInput.get(i).equals("B")){
+                output.add(fixedInput.get(i));
+            }
+        }
+        return output;
+
     }
 
 
@@ -53,7 +94,9 @@ class Brackets {
         return coefficient.size()==0? null: coefficient;
     }
 
-    private static List<String> getBracketContentWithoutCoefficientToNextBracket(final List<String> input, String tag, String tagIn){
+     private static List<String> getBracketContentWithoutCoefficientToNextBracket(final List<String> input, String tag){
+        int lastIndex = Integer.parseInt(tag.substring(tag.indexOf("F")+1))+1;
+        String tagIn = tag.substring(0,tag.indexOf("F"))+"F"+lastIndex;
         boolean inBracket = false;
         List<String> content = new ArrayList<>();
         List<Integer> indexToNotAdd = new ArrayList<>();
@@ -95,145 +138,80 @@ class Brackets {
 
     }
 
-    static List<String> solveBrackets(final List<String> input, int index1, int index2, boolean ending, List<String> beforeCoefficient) {
+   static List<String> solveBrackets(final List<String> input, int index1, int index2, boolean ending, List<String> beforeCoefficient) {
+       if (index1 == 0) { currentBracketSolvedValue = new ArrayList<>(); }
+       // defining tags
+       final String tag = index1 + "F" + index2;
+       final String tagIn = index1 + "F" + (index2+1);
+       // save guard for no brackets
+       if(ending) {
+           List<String> output;
+           int i = 0;
+           do{
+               output = excludeAllBracketsAndCoefficient(input, i+"F0");
+               i++;
+           }
+           while (output.contains(i+"F0"));
+           System.out.println(currentBracketSolvedValue);
+           if (currentBracketSolvedValue != null) {
+               output.addAll(currentBracketSolvedValue);
+           }
+           return output;
+       }
 
-        System.out.println(index1 + "F" + index2);
+       List<String> coefficient;
+       if (index1 == 0) { allBrackets = addAllBracketsToMap(input, index1 + 1, index2); }
+       coefficient = allBrackets.get(tag).coefficient;
+       if (beforeCoefficient != null) {
+           coefficient.addAll(beforeCoefficient);
+       }
+       List<String> content = allBrackets.get(tag).content;
+
+       if (input.contains(tagIn)) {
+           index2++;
+       } else if (input.contains(tag)) {
+           index1++;
+           beforeCoefficient = null;
+       }
+
+       if (coefficient == null) {
+           return solveBrackets(input, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2), null);
+
+       } else {
+           // formatting and creating minor adjustments
+           coefficient.remove(0);
+           if (beforeCoefficient != null) {
+               coefficient.addAll(beforeCoefficient);
+           }
+           List<Polynomial> solved = Calculator.multiplyBrackets(Polynomial.createPolynomials(content), Polynomial.createPolynomials(coefficient));
+           // adding extra before solved variables
+           for (Polynomial p : solved) {
+               currentBracketSolvedValue.addAll(p.stringValue);
+           }
 
 
-        List<String> content = getBracketContentWithoutCoefficientToNextBracket(input, index1 + "F" + index2, index1 + "F" + (index2 + 1));
-        List<String> coefficient = getCoefficient(input, index1 + "F" + index2);
-        List<String> output = removeBracketAndCoefficient(input,index1 + "F" + index2,index1 + "F" + (index2 + 1));
+           coefficient.add(0, "*");
+           return solveBrackets(input, index1, index2, !input.contains(tagIn) && !input.contains((index1 + 1) + "F" + index2), coefficient);
+
+       }
 
 
-        if(input.contains(index1 + "F" + (index2+1))){
-            index2++;
-        }else if(input.contains((index1+1) + "F" + index2)){
-            index1++;
-            beforeCoefficient = new ArrayList<>(Arrays.asList("*","1"));
+   }
+
+    private static HashMap<String,Brackets> addAllBracketsToMap(final List<String> input, int index1, int index2) {
+        // do not include tag index1+"F"+index2
+
+        HashMap<String,Brackets> allBracketsInformation = new HashMap<>();
+        for (String element: input) {
+            if(element.equals(index1+"F"+index2)){break;}
+            if(element.contains("F")){
+                allBracketsInformation.put(element,new Brackets(getCoefficient(input,element),
+                        getBracketContentWithoutCoefficientToNextBracket(input,element)));
+            }
         }
-
-        if(coefficient==null){
-            output.addAll(content);
-
-            if(ending){
-                System.out.println("finished");
-                return output;
-            }else {
-                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2), beforeCoefficient);
-            }
-        }else {
-            System.out.println("multiplied");
-            // creating minor adjustments
-            coefficient.remove(0);
-            coefficient.addAll(beforeCoefficient);
-            System.out.println(coefficient);
-
-            List<Polynomial> solved = Calculator.multiplyBrackets(Polynomial.createPolynomials(content), Polynomial.createPolynomials(coefficient));
-
-            // adding extra before solved variables
-            for (Polynomial p: solved) {
-                output.addAll(p.stringValue);
-            }
-
-            if(ending){
-                System.out.println("finished");
-                System.out.println(output);
-                return output;
-            }else {
-                coefficient.add(0,"*");
-                return solveBrackets(output, index1, index2, !input.contains(index1 + "F" + (index2 + 1)) && !input.contains((index1 + 1) + "F" + index2),coefficient );
-            }
-        }
+        return allBracketsInformation;
 
     }
 
-    private static List<String> removeBracketAndCoefficient(final List<String> input, String tag, String tagIn){
 
-        List<String> helper = new ArrayList<>();
-        List<String> output = new ArrayList<>();
-        List<Integer> indexToNotAdd = new ArrayList<>();
-        List<String> firstCoefficient = new ArrayList<>();
-
-        boolean afterLast = false;
-        boolean isANum = false;
-
-        boolean removeFirstBracket = false;
-        boolean isInSecondBracket = false;
-
-        int index = 0;
-        for (String s: input) {
-            if(s.equals(tagIn)){
-                if(!isInSecondBracket && 0<=index){
-                    int i = 1;
-                    boolean nextAdd = false;
-                    while ((0<=index - i&& input.get(index - i).equals("*")||input.get(index - i).equals("/"))||nextAdd){
-                        firstCoefficient.add(input.get(index - i));
-                        nextAdd = !nextAdd;
-                        i++;
-                    }
-                }
-                helper.add(s);
-                isInSecondBracket = !isInSecondBracket;
-                if(!isInSecondBracket && input.size()!=index+1){
-                    int i = 1;
-                    boolean nextAdd = false;
-                    while ((input.size()!=index+1&& input.get(index + i).equals("*")||input.get(index + i).equals("/"))||nextAdd){
-                        helper.add(input.get(index + i));
-                        nextAdd = !nextAdd;
-                        i++;
-                    }
-                }
-            }
-            else if(s.equals(tag)){
-
-                if(index!=0 && !removeFirstBracket) {
-                    int i = 1;
-                    indexToNotAdd.add(index);
-                    boolean nextAdd = false;
-                    while (index - i >= 0 && (input.get(index - i).contains("*") || input.get(index - i).contains("/"))||nextAdd) {
-                        indexToNotAdd.add(index - i);
-                        i++;
-                        nextAdd = !nextAdd;
-                    }
-                }else if((index+1)!=input.size()){
-                    int i = 1;
-                    indexToNotAdd.add(index);
-                    boolean nextAdd = false;
-                    while (index + i < input.size() && (input.get(index + i).contains("*") || input.get(index + i).contains("/"))||nextAdd) {
-                        indexToNotAdd.add(index + i);
-                        i++;
-                        nextAdd = !nextAdd;
-                    }
-                    afterLast = true;
-                }
-                removeFirstBracket = !removeFirstBracket;
-            }
-
-            if((((!removeFirstBracket||isInSecondBracket)))&&!s.equals(tag)&&!afterLast){
-                helper.add(s);
-            }
-            if(((index+1)!=input.size()&&afterLast)){
-                if(isANum||(input.get(index+1).contains("*")||input.get(index+1).contains("/"))){
-                    isANum = !isANum;
-                }else {
-                    afterLast = false;
-                }
-            }
-
-            index++;
-
-        }
-
-        for (int i = 0; i < helper.size(); i++) {
-            if(indexToNotAdd.indexOf(i)==-1){
-                output.add(helper.get(i));
-            }
-        }
-
-        for (int j = firstCoefficient.size(); j > 0; j--) {
-            output.add(output.indexOf(tagIn),firstCoefficient.get(j-1));
-        }
-
-        return output;
-    }
 }

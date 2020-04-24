@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class Polynomial {
@@ -9,18 +10,25 @@ class Polynomial {
     private Polynomial(List<String> stringValue){
 
         // on init polynomials multiply into one number
-
-
         this.stringValue = Calculator.getOneNumber(stringValue);
         hasVar = this.stringValue.get(0).contains("x");
+        for (int i = 0; i <this.stringValue.size() ; i++) {
+            this.stringValue.set(i,EquationSolver.fixOperators(this.stringValue.get(i)));
+        }
 
-        if(hasVar){
-            realValue = Double.parseDouble(this.stringValue.get(0).replace("x",""));
-        }else{
+        if (hasVar) {
+            realValue = Double.parseDouble(this.stringValue.get(0).replace("x", ""));
+        } else {
             realValue = Double.parseDouble(this.stringValue.get(0));
         }
 
+
     }
+
+    public void setStringValue(int index,String stringValue) {
+        this.stringValue.set(index, stringValue);
+    }
+
     static List<Polynomial> createPolynomials(final List<String> equationSide){
         // creating polynomials from sorted list
 
@@ -45,6 +53,12 @@ class Polynomial {
             }
 
         }
+        //for (Polynomial polynomial:polynomialsSide) {
+        //    for (int j = 0; j <polynomial.stringValue.size() ; j++) {
+        //        polynomial.setStringValue(j,EquationSolver.fixOperators(polynomial.stringValue.get(j)));
+        //    }
+        //}
+
         return polynomialsSide;
     }
 

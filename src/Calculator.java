@@ -25,7 +25,8 @@ class Calculator {
         }
         return new double[]{total, totalVar};
     }
-    static List<Polynomial> multiplyBrackets(List<Polynomial> polynomials1, List<Polynomial> polynomials2){
+
+    strictfp static List<Polynomial> multiplyBrackets(List<Polynomial> polynomials1, List<Polynomial> polynomials2){
         double[] t1 = addUpPolynomials(polynomials1);
         double[] t2 = addUpPolynomials(polynomials2);
         String x1 = t1[1]==0?"0":"x";
@@ -43,17 +44,16 @@ class Calculator {
         List<String> output = new ArrayList<>();
 
         output.add(varTotal1); output.add("*"); output.add(x1); output.add("*");
-        output.add(varTotal2); output.add("*"); output.add(x2); output.add("+");
+        output.add(varTotal2); output.add("*"); output.add(x2);
 
         output.add(varTotal1); output.add("*"); output.add(x1); output.add("*");
-        output.add(total2); output.add("+");
+        output.add(total2);
 
         output.add(total1); output.add("*");
-        output.add(varTotal2); output.add("*"); output.add(x2); output.add("+");
+        output.add(varTotal2); output.add("*");output.add(x2);
 
         output.add(total1); output.add("*");
         output.add(total2);
-
 
         return Polynomial.createPolynomials(output);
     }
@@ -104,20 +104,19 @@ class Calculator {
             }
         }
     }
-
-    private static String add(String num1, String num2){
+    strictfp private static String add(String num1, String num2){
         if(num1.contains("x") && num2.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) + Double.parseDouble(num2.replace("x", "")))+"x";
         }
         return Double.toString(Double.parseDouble(num1) + Double.parseDouble(num2));
     }
-    private static String subtract(String num1, String num2){
+    strictfp private static String subtract(String num1, String num2){
         if(num1.contains("x") && num2.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) - Double.parseDouble(num2.replace("x", "")))+"x";
         }
         return Double.toString(Double.parseDouble(num1) - Double.parseDouble(num2));
     }
-    private static String multiply(String num1, String num2){
+    strictfp private static String multiply(String num1, String num2){
         if(num1.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) * Double.parseDouble(num2))+"x";
         }else if(num2.contains("x")){
@@ -130,7 +129,7 @@ class Calculator {
         }
         return Double.toString(Double.parseDouble(num1) * Double.parseDouble(num2));
     }
-    private static String divide(String num1, String num2){
+    strictfp private static String divide(String num1, String num2){
         if(num1.contains("x")){
             return (Double.parseDouble(num1.replace("x", "")) / Double.parseDouble(num2))+"x";
         }else if(num2.contains("x")){
@@ -145,10 +144,10 @@ class Calculator {
         return Double.toString(Double.parseDouble(num1) / Double.parseDouble(num2));
     }
 
-    private static String squareRoot(String num1, String num2){
+    strictfp private static String squareRoot(String num1, String num2){
         return Double.toString(Math.pow(Double.parseDouble(num2),  1/Double.parseDouble(num1)));
     }
-    private static String root(String num1, String num2){
+    strictfp private static String root(String num1, String num2){
         return Double.toString(Math.pow(Double.parseDouble(num1),  Double.parseDouble(num2)));
     }
 
